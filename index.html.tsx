@@ -1,66 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Full-Stack Deployment Success</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        .container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        h1 {
-            color: #333;
-        }
-        #backend-message {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: #e9e9e9;
-            font-weight: bold;
-            color: #007bff;
-        }
-    </style>
+  <title>Legal Marketplace</title>
+  <style>
+    /* Optional: Added a little CSS for better readability */
+    body { font-family: sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    #lawyer-list { list-style: none; padding: 0; }
+    #lawyer-list li {
+      padding: 10px;
+      margin-bottom: 5px;
+      border-bottom: 1px solid #eee;
+      background-color: #f9f9f9;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Vercel Frontend</h1>
-        <p>This page is hosted on Vercel and is now fetching data from your Railway Backend.</p>
-        <div id="backend-message">Loading message from backend...</div>
-    </div>
+  <h1>Find Online Lawyers</h1>
+  <ul id="lawyer-list">
+    <!-- Initial loading message -->
+    <li>Loading online lawyers...</li>
+  </ul>
 
-    <script>
-        // *** IMPORTANT: Replace this URL with your actual Railway URL ***
-        const BACKEND_URL = 'https://nwo-backend-production.up.railway.app';
+  <script>
+    // **CORRECTION:** Replaced placeholder with your live Railway URL
+    const BACKEND_URL = "https://nwo-backend-production.up.railway.app";
 
-        fetch(`${BACKEND_URL}/api/message` )
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById('backend-message').textContent = data.message;
-            })
-            .catch(error => {
-                console.error('Fetch error:', error);
-                document.getElementById('backend-message').textContent = `Error: Could not connect to backend. Check console for details.`;
-            });
-    </script>
+    async function fetchLawyers( ) {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/lawyer/list`);
+        
+        // Check if the response was successful
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+
+        const lawyers = await res.json();
+        const listEl = document.getElementById("lawyer-list");
+        listEl.innerHTML = ""; // Clear the list
+
+        if (lawyers.length === 0) {
+          listEl.innerHTML = "<li>No lawyers are currently online.</li>";
+          return;
+        }
+
+        lawyers.forEach(l => {
+          const li = document.createElement("li");
+          // Assuming l.name and l.rating are available from the backend response
+          li.textContent = `${l.name} - Rating: ${l.rating}`;
+          listEl.appendChild(li);
+        });
+      } catch (error) {
+        console.error("Error fetching lawyers:", error);
+        const listEl = document.getElementById("lawyer-list");
+        listEl.innerHTML = `<li>Error connecting to backend: ${error.message}</li>`;
+      }
+    }
+
+    fetchLawyers();
+    setInterval(fetchLawyers, 10000); // refresh every 10s
+  </script>
 </body>
 </html>
