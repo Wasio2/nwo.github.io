@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lawyer Dashboard</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; text-align: center; }
+    h1 { color: #007bff; }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      color: white;
+    }
+    #online-btn { background-color: #28a745; }
+    #offline-btn { background-color: #dc3545; }
+    #status-display {
+      margin-top: 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lawyer Dashboard</h1>
+  <p>Your ID: <span id="lawyer-id-display">1</span></p>
+  <div id="status-display">Status: Checking...</div>
+
+  <button id="online-btn" onclick="setStatus(true)">Go Online</button>
+  <button id="offline-btn" onclick="setStatus(false)">Go Offline</button>
+
+  <script>
+    // **CORRECTION:** Replaced placeholder with your live Railway URL
+    const BACKEND_URL = "https://nwo-backend-production.up.railway.app";
+    
+    // We will hardcode the ID for now, as you only have one test lawyer (ID 1 )
+    const lawyerId = 1; 
+    document.getElementById("lawyer-id-display").textContent = lawyerId;
+
+    async function setStatus(status) {
+      const statusText = status ? "Online" : "Offline";
+      
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/lawyer/status`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lawyer_id: lawyerId, is_online: status })
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+
+        document.getElementById("status-display").textContent = `Status: ${statusText}`;
+        alert(`Status updated: You are now ${statusText}`);
+        
+      } catch (error) {
+        console.error("Error updating status:", error);
+        alert(`Error updating status. Check console for details.`);
+      }
+    }
+  </script>
+</body>
+</html>
