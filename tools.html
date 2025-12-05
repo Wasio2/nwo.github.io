@@ -104,18 +104,129 @@
     }
 
     // 3. Rate Lawyer
+    <!DOCTYPE html>
+<html>
+<head>
+  <title>API Testing Tools</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .tool-section {
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    input, select, textarea {
+      padding: 8px;
+      margin-right: 10px;
+      margin-bottom: 10px; /* Added margin for better spacing */
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 90%; /* Made inputs wider */
+      box-sizing: border-box;
+    }
+    textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>API Testing Tools</h1>
+    <p>Use this page to test the complex POST endpoints of your Railway backend.</p>
+
+    <!-- 1. FIND LAWYER REQUEST -->
+    <div class="tool-section">
+      <h2>1. Find Lawyer Request</h2>
+      <p>Creates a new case request in the database.</p>
+      <select id="case-type">
+        <option value="traffic">Traffic</option>
+        <option value="arrest">Arrest</option>
+        <option value="court">Court</option>
+      </select>
+      <button onclick="requestLawyer()">Find Lawyer</button>
+    </div>
+
+    <!-- 2. COMPLETE CASE / WALLET PAYOUT -->
+    <div class="tool-section">
+      <h2>2. Complete Case & Payout</h2>
+      <p>Marks a case as complete and processes payment.</p>
+      <input type="number" id="case-id" placeholder="Case ID (e.g., 1)">
+      <input type="number" id="amount" placeholder="Amount Paid (e.g., 100)">
+      <input type="number" id="lawyer-id-complete" value="1" placeholder="Lawyer ID">
+      <button onclick="completeCase()">Complete Case</button>
+    </div>
+
+    <!-- 3. RATE LAWYER (UPDATED) -->
+    <div class="tool-section">
+      <h2>3. Rate Lawyer</h2>
+      <p>Submits a rating and updates the lawyer's average rating.</p>
+      <input type="number" id="lawyer-id-rate" value="1" placeholder="Lawyer ID">
+      <input type="number" id="user-id-rate" value="1" placeholder="Your User ID">
+      <input type="number" id="stars" placeholder="Stars 1-5">
+      <textarea id="comment" placeholder="Comment"></textarea>
+      <button onclick="rateLawyer()">Submit Rating</button>
+    </div>
+  </div>
+
+  <script>
+    const BACKEND_URL = "https://nwo-backend-production.up.railway.app";
+    const USER_ID = 1; // Hardcoded test user ID for some functions
+
+    // 1. Request Lawyer
+    async function requestLawyer( ){
+      const caseType = document.getElementById("case-type").value;
+      
+      const res = await fetch(`${BACKEND_URL}/api/request-lawyer`, {
+        method:"POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          user_id: USER_ID,
+          case_type: caseType,
+          lat: 34.05,
+          lng: -118.24
+        })
+      });
+      const data = await res.json();
+      alert(data.request_id ? "Request Created. ID: " + data.request_id : data.error);
+    }
+
+    // 2. Complete Case
+    async function completeCase(){
+      const caseId = document.getElementById("case-id").value;
+      const amount = document.getElementById("amount").value;
+      const lawyerId = document.getElementById("lawyer-id-complete").value;
+
+      const res = await fetch(`${BACKEND_URL}/api/case/complete`, {
+        method:"POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          case_id: caseId,
+          amount: parseFloat(amount),
+          lawyer_id: parseInt(lawyerId)
+        })
+      });
+      const data = await res.json();
+      alert(data.message || data.error);
+    }
+
+    // 3. Rate Lawyer (Updated to use your inputs)
     async function rateLawyer(){
-      const lawyerId = document.getElementById("rate-lawyer-id").value;
+      const lawyerId = document.getElementById("lawyer-id-rate").value;
+      const userId = document.getElementById("user-id-rate").value;
       const stars = document.getElementById("stars").value;
+      const comment = document.getElementById("comment").value;
 
       const res = await fetch(`${BACKEND_URL}/api/rate-lawyer`, {
         method:"POST",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({
-          user_id: USER_ID,
           lawyer_id: parseInt(lawyerId),
+          user_id: parseInt(userId),
           stars: parseInt(stars),
-          comment: "Test rating from tools page."
+          comment: comment
         })
       });
       const data = await res.json();
@@ -124,3 +235,4 @@
   </script>
 </body>
 </html>
+
